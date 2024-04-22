@@ -58,10 +58,10 @@ uint16_t otherDistances[2]; //mm
 uint8_t BlackDetected = 0;
 uint8_t id;
 CAN_RxHeaderTypeDef rxHeader;
-uint8_t 			rxData[8];
+uint8_t rxData[8];
 CAN_TxHeaderTypeDef txHeader;
-uint8_t             txData[8];
-uint32_t            txMailbox;
+uint8_t txData[8];
+uint32_t txMailbox;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,163 +78,163 @@ static void MX_CAN_Init(void);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
-{
-  /* USER CODE BEGIN 1 */
-  //
-  /* USER CODE END 1 */
+ * @brief  The application entry point.
+ * @retval int
+ */
+int main(void) {
+	/* USER CODE BEGIN 1 */
+	//
+	/* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+	/* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* USER CODE BEGIN Init */
-  //
-  /* USER CODE END Init */
+	/* USER CODE BEGIN Init */
+	//
+	/* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+	/* Configure the system clock */
+	SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
-  //
-  /* USER CODE END SysInit */
+	/* USER CODE BEGIN SysInit */
+	//
+	/* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_CAN_Init();
-  /* USER CODE BEGIN 2 */
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_CAN_Init();
+	/* USER CODE BEGIN 2 */
 
-  HCSR04_Init(0, &htim2);
-  HCSR04_Init(1, &htim3);
-  id = (GPIOB->IDR & 0x0300) >> 8;
-  txHeader.IDE = CAN_ID_STD;
-  txHeader.StdId = 1 + id;
-  txHeader.RTR = CAN_RTR_DATA;
-  txHeader.DLC = id < 2? 5:4;
-  if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO1_MSG_PENDING) != HAL_OK)
-  {
-  Error_Handler();
-  }
-  /* USER CODE END 2 */
+	HCSR04_Init(0, &htim2);
+	HCSR04_Init(1, &htim3);
+	id = (GPIOB->IDR & 0x0300) >> 8;
+	txHeader.IDE = CAN_ID_STD;
+	txHeader.StdId = 1;
+	txHeader.RTR = CAN_RTR_DATA;
+	txHeader.DLC = id < 2 ? 5 : 4;
+	if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO1_MSG_PENDING)
+			!= HAL_OK) {
+		Error_Handler();
+	}
+	if (HAL_CAN_AddTxMessage(&hcan, &txHeader, txData, &txMailbox) != HAL_OK) {
+		Error_Handler();
+	}
+	while (HAL_CAN_IsTxMessagePending(&hcan, txMailbox)) {
+	}
+	txHeader.StdId += id;
+	/* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1) {
-    Distance1 = (uint16_t)(HCSR04_Read(0)*10);
-    Distance2 = (uint16_t)(HCSR04_Read(1)*10);
-    txData[0] = Distance1 >> 8;
-    txData[1] = Distance1 & 0x00FF;
-    txData[2] = Distance2 >> 8;
-	txData[3] = Distance2 & 0x00FF;
-	if(id < 2 && HAL_GPIO_ReadPin(IR_GPIO_Port, IR_Pin)) txData[4] = 1;
-	if(HAL_CAN_AddTxMessage(&hcan, &txHeader, txData, &txMailbox) != HAL_OK)
-    {
-		Error_Handler ();
-    }
-    HAL_Delay(10);
-  }
-    /* USER CODE END WHILE */
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+	while (1) {
+		Distance1 = (uint16_t) (HCSR04_Read(0) * 10);
+		Distance2 = (uint16_t) (HCSR04_Read(1) * 10);
+		txData[0] = Distance1 >> 8;
+		txData[1] = Distance1 & 0x00FF;
+		txData[2] = Distance2 >> 8;
+		txData[3] = Distance2 & 0x00FF;
+		if (id < 2 && HAL_GPIO_ReadPin(IR_GPIO_Port, IR_Pin))
+			txData[4] = 1;
+		if (HAL_CAN_AddTxMessage(&hcan, &txHeader, txData, &txMailbox)
+				!= HAL_OK) {
+			Error_Handler();
+		}
+		HAL_Delay(10);
+	}
+	/* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
-  //  }
-  /* USER CODE END 3 */
+	/* USER CODE BEGIN 3 */
+	//  }
+	/* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-void SystemClock_Config(void)
-{
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+ * @brief System Clock Configuration
+ * @retval None
+ */
+void SystemClock_Config(void) {
+	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	/** Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+		Error_Handler();
+	}
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+	/** Initializes the CPU, AHB and APB buses clocks
+	 */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 /**
-  * @brief CAN Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_CAN_Init(void)
-{
+ * @brief CAN Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_CAN_Init(void) {
 
-  /* USER CODE BEGIN CAN_Init 0 */
+	/* USER CODE BEGIN CAN_Init 0 */
 
-  /* USER CODE END CAN_Init 0 */
+	/* USER CODE END CAN_Init 0 */
 
-  /* USER CODE BEGIN CAN_Init 1 */
+	/* USER CODE BEGIN CAN_Init 1 */
 
-  /* USER CODE END CAN_Init 1 */
-  hcan.Instance = CAN1;
-  hcan.Init.Prescaler = 4;
-  hcan.Init.Mode = CAN_MODE_NORMAL;
-  hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan.Init.TimeSeg1 = CAN_BS1_15TQ;
-  hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
-  hcan.Init.TimeTriggeredMode = DISABLE;
-  hcan.Init.AutoBusOff = DISABLE;
-  hcan.Init.AutoWakeUp = DISABLE;
-  hcan.Init.AutoRetransmission = DISABLE;
-  hcan.Init.ReceiveFifoLocked = DISABLE;
-  hcan.Init.TransmitFifoPriority = DISABLE;
-  if (HAL_CAN_Init(&hcan) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN CAN_Init 2 */
+	/* USER CODE END CAN_Init 1 */
+	hcan.Instance = CAN1;
+	hcan.Init.Prescaler = 4;
+	hcan.Init.Mode = CAN_MODE_NORMAL;
+	hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
+	hcan.Init.TimeSeg1 = CAN_BS1_15TQ;
+	hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
+	hcan.Init.TimeTriggeredMode = DISABLE;
+	hcan.Init.AutoBusOff = DISABLE;
+	hcan.Init.AutoWakeUp = DISABLE;
+	hcan.Init.AutoRetransmission = DISABLE;
+	hcan.Init.ReceiveFifoLocked = DISABLE;
+	hcan.Init.TransmitFifoPriority = DISABLE;
+	if (HAL_CAN_Init(&hcan) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN CAN_Init 2 */
 
-  /* USER CODE END CAN_Init 2 */
+	/* USER CODE END CAN_Init 2 */
 
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_GPIO_Init(void) {
+	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	/* USER CODE BEGIN MX_GPIO_Init_1 */
+	/* USER CODE END MX_GPIO_Init_1 */
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 
 //  /*Configure GPIO pin Output Level */
 //  HAL_GPIO_WritePin(GPIOB, US1_TRIG_Pin|US2_TRIG_Pin, GPIO_PIN_RESET);
@@ -246,59 +246,56 @@ static void MX_GPIO_Init(void)
 //  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
 //  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : IR_Pin ID0_Pin ID1_Pin */
-  GPIO_InitStruct.Pin = IR_Pin|ID0_Pin|ID1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	/*Configure GPIO pins : IR_Pin ID0_Pin ID1_Pin */
+	GPIO_InitStruct.Pin = IR_Pin | ID0_Pin | ID1_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+	/* USER CODE BEGIN MX_GPIO_Init_2 */
+	/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
-  HCSR04_TMR_IC_ISR(htim);
+	HCSR04_TMR_IC_ISR(htim);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-  HCSR04_TMR_OVF_ISR(htim);
+	HCSR04_TMR_OVF_ISR(htim);
 }
 
 void SysTick_CallBack(void) {
-  SysTicks++;
-  if (SysTicks == 15) // Each 15msec
-  {
-    HCSR04_Trigger(0);
-    HCSR04_Trigger(1);
-    SysTicks = 0;
-  }
+	SysTicks++;
+	if (SysTicks == 15) // Each 15msec
+			{
+		HCSR04_Trigger(0);
+		HCSR04_Trigger(1);
+		SysTicks = 0;
+	}
 }
 
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
-{
-	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rxHeader, rxData) != HAL_OK)
-	{
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rxHeader, rxData) != HAL_OK) {
 		Error_Handler();
 	}
-	otherDistances[0] = ((uint16_t)rxData[0] << 8) + rxData[1];
-	otherDistances[1] = ((uint16_t)rxData[2] << 8) + rxData[3];
+	otherDistances[0] = ((uint16_t) rxData[0] << 8) + rxData[1];
+	otherDistances[1] = ((uint16_t) rxData[2] << 8) + rxData[3];
 }
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void)
-{
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1) {
-  }
-  /* USER CODE END Error_Handler_Debug */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
+void Error_Handler(void) {
+	/* USER CODE BEGIN Error_Handler_Debug */
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
+	/* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT

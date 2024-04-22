@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file         stm32f1xx_hal_msp.c
-  * @brief        This file provides code for the MSP Initialization
-  *               and de-Initialization codes.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file         stm32f1xx_hal_msp.c
+ * @brief        This file provides code for the MSP Initialization
+ *               and de-Initialization codes.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -59,242 +59,225 @@
 
 /* USER CODE END 0 */
 /**
-  * Initializes the Global MSP.
-  */
-void HAL_MspInit(void)
-{
-  /* USER CODE BEGIN MspInit 0 */
+ * Initializes the Global MSP.
+ */
+void HAL_MspInit(void) {
+	/* USER CODE BEGIN MspInit 0 */
 
-  /* USER CODE END MspInit 0 */
+	/* USER CODE END MspInit 0 */
 
-  __HAL_RCC_AFIO_CLK_ENABLE();
-  __HAL_RCC_PWR_CLK_ENABLE();
+	__HAL_RCC_AFIO_CLK_ENABLE();
+	__HAL_RCC_PWR_CLK_ENABLE();
 
-  /* System interrupt init*/
+	/* System interrupt init*/
 
-  /** NOJTAG: JTAG-DP Disabled and SW-DP Enabled
-  */
-  __HAL_AFIO_REMAP_SWJ_NOJTAG();
+	/** NOJTAG: JTAG-DP Disabled and SW-DP Enabled
+	 */
+	__HAL_AFIO_REMAP_SWJ_NOJTAG();
 
-  /* USER CODE BEGIN MspInit 1 */
+	/* USER CODE BEGIN MspInit 1 */
 
-  /* USER CODE END MspInit 1 */
+	/* USER CODE END MspInit 1 */
 }
 
 /**
-* @brief CAN MSP Initialization
-* This function configures the hardware resources used in this example
-* @param hcan: CAN handle pointer
-* @retval None
-*/
-void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(hcan->Instance==CAN1)
-  {
-  /* USER CODE BEGIN CAN1_MspInit 0 */
+ * @brief CAN MSP Initialization
+ * This function configures the hardware resources used in this example
+ * @param hcan: CAN handle pointer
+ * @retval None
+ */
+void HAL_CAN_MspInit(CAN_HandleTypeDef *hcan) {
+	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	if (hcan->Instance == CAN1) {
+		/* USER CODE BEGIN CAN1_MspInit 0 */
 
-  /* USER CODE END CAN1_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_CAN1_CLK_ENABLE();
+		/* USER CODE END CAN1_MspInit 0 */
+		/* Peripheral clock enable */
+		__HAL_RCC_CAN1_CLK_ENABLE();
 
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**CAN GPIO Configuration
-    PA11     ------> CAN_RX
-    PA12     ------> CAN_TX
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_11;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+		/**CAN GPIO Configuration
+		 PA11     ------> CAN_RX
+		 PA12     ------> CAN_TX
+		 */
+		GPIO_InitStruct.Pin = GPIO_PIN_11;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    /* CAN1 interrupt Init */
-    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
-  /* USER CODE BEGIN CAN1_MspInit 1 */
-    GPIO_InitStruct.Pin = GPIO_PIN_12;
-	GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-    CAN_FilterTypeDef canfilterconfig;
-    canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-    canfilterconfig.FilterBank = 0;
-    canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-    canfilterconfig.FilterIdHigh = 0x7FF<<5;
-    canfilterconfig.FilterIdLow = 0;
-    canfilterconfig.FilterMaskIdHigh = 0x7FF<<5;
-    canfilterconfig.FilterMaskIdLow = 0x0000;
-    canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-    canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    HAL_CAN_ConfigFilter(hcan, &canfilterconfig);
-  /* USER CODE END CAN1_MspInit 1 */
-  }
-
-}
-
-/**
-* @brief CAN MSP De-Initialization
-* This function freeze the hardware resources used in this example
-* @param hcan: CAN handle pointer
-* @retval None
-*/
-void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
-{
-  if(hcan->Instance==CAN1)
-  {
-  /* USER CODE BEGIN CAN1_MspDeInit 0 */
-
-  /* USER CODE END CAN1_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_CAN1_CLK_DISABLE();
-
-    /**CAN GPIO Configuration
-    PA11     ------> CAN_RX
-    PA12     ------> CAN_TX
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11|GPIO_PIN_12);
-
-    /* CAN1 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(CAN1_RX1_IRQn);
-  /* USER CODE BEGIN CAN1_MspDeInit 1 */
-
-  /* USER CODE END CAN1_MspDeInit 1 */
-  }
+		/* CAN1 interrupt Init */
+		HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
+		/* USER CODE BEGIN CAN1_MspInit 1 */
+		GPIO_InitStruct.Pin = GPIO_PIN_12;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		CAN_FilterTypeDef canfilterconfig;
+		canfilterconfig.FilterBank = 0;
+		canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+		canfilterconfig.FilterIdHigh = 0x0 << 5;
+		canfilterconfig.FilterIdLow = 0;
+		canfilterconfig.FilterMaskIdHigh = 0xFF8 << 5; // after testing should be 0xFFF to pass id 0 only
+		canfilterconfig.FilterMaskIdLow = 0;
+		canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+		canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
+		canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
+		HAL_CAN_ConfigFilter(hcan, &canfilterconfig);
+		/* USER CODE END CAN1_MspInit 1 */
+	}
 
 }
 
 /**
-* @brief TIM_Base MSP Initialization
-* This function configures the hardware resources used in this example
-* @param htim_base: TIM_Base handle pointer
-* @retval None
-*/
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(htim_base->Instance==TIM2)
-  {
-  /* USER CODE BEGIN TIM2_MspInit 0 */
+ * @brief CAN MSP De-Initialization
+ * This function freeze the hardware resources used in this example
+ * @param hcan: CAN handle pointer
+ * @retval None
+ */
+void HAL_CAN_MspDeInit(CAN_HandleTypeDef *hcan) {
+	if (hcan->Instance == CAN1) {
+		/* USER CODE BEGIN CAN1_MspDeInit 0 */
 
-  /* USER CODE END TIM2_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM2_CLK_ENABLE();
+		/* USER CODE END CAN1_MspDeInit 0 */
+		/* Peripheral clock disable */
+		__HAL_RCC_CAN1_CLK_DISABLE();
 
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**TIM2 GPIO Configuration
-    PB10     ------> TIM2_CH3
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_10;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		/**CAN GPIO Configuration
+		 PA11     ------> CAN_RX
+		 PA12     ------> CAN_TX
+		 */
+		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11 | GPIO_PIN_12);
 
-    __HAL_AFIO_REMAP_TIM2_PARTIAL_2();
+		/* CAN1 interrupt DeInit */
+		HAL_NVIC_DisableIRQ(CAN1_RX1_IRQn);
+		/* USER CODE BEGIN CAN1_MspDeInit 1 */
 
-    /* TIM2 interrupt Init */
-    HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(TIM2_IRQn);
-  /* USER CODE BEGIN TIM2_MspInit 1 */
-
-  /* USER CODE END TIM2_MspInit 1 */
-  }
-  else if(htim_base->Instance==TIM3)
-  {
-  /* USER CODE BEGIN TIM3_MspInit 0 */
-
-  /* USER CODE END TIM3_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM3_CLK_ENABLE();
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**TIM3 GPIO Configuration
-    PB4     ------> TIM3_CH1
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_4;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    __HAL_AFIO_REMAP_TIM3_PARTIAL();
-
-    /* TIM3 interrupt Init */
-    HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(TIM3_IRQn);
-  /* USER CODE BEGIN TIM3_MspInit 1 */
-
-  /* USER CODE END TIM3_MspInit 1 */
-  }
-  else if(htim_base->Instance==TIM4)
-  {
-  /* USER CODE BEGIN TIM4_MspInit 0 */
-
-  /* USER CODE END TIM4_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM4_CLK_ENABLE();
-  /* USER CODE BEGIN TIM4_MspInit 1 */
-
-  /* USER CODE END TIM4_MspInit 1 */
-  }
+		/* USER CODE END CAN1_MspDeInit 1 */
+	}
 
 }
 
 /**
-* @brief TIM_Base MSP De-Initialization
-* This function freeze the hardware resources used in this example
-* @param htim_base: TIM_Base handle pointer
-* @retval None
-*/
-void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
-{
-  if(htim_base->Instance==TIM2)
-  {
-  /* USER CODE BEGIN TIM2_MspDeInit 0 */
+ * @brief TIM_Base MSP Initialization
+ * This function configures the hardware resources used in this example
+ * @param htim_base: TIM_Base handle pointer
+ * @retval None
+ */
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim_base) {
+	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	if (htim_base->Instance == TIM2) {
+		/* USER CODE BEGIN TIM2_MspInit 0 */
 
-  /* USER CODE END TIM2_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM2_CLK_DISABLE();
+		/* USER CODE END TIM2_MspInit 0 */
+		/* Peripheral clock enable */
+		__HAL_RCC_TIM2_CLK_ENABLE();
 
-    /**TIM2 GPIO Configuration
-    PB10     ------> TIM2_CH3
-    */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_10);
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+		/**TIM2 GPIO Configuration
+		 PB10     ------> TIM2_CH3
+		 */
+		GPIO_InitStruct.Pin = GPIO_PIN_10;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* TIM2 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(TIM2_IRQn);
-  /* USER CODE BEGIN TIM2_MspDeInit 1 */
+		__HAL_AFIO_REMAP_TIM2_PARTIAL_2();
 
-  /* USER CODE END TIM2_MspDeInit 1 */
-  }
-  else if(htim_base->Instance==TIM3)
-  {
-  /* USER CODE BEGIN TIM3_MspDeInit 0 */
+		/* TIM2 interrupt Init */
+		HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM2_IRQn);
+		/* USER CODE BEGIN TIM2_MspInit 1 */
 
-  /* USER CODE END TIM3_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM3_CLK_DISABLE();
+		/* USER CODE END TIM2_MspInit 1 */
+	} else if (htim_base->Instance == TIM3) {
+		/* USER CODE BEGIN TIM3_MspInit 0 */
 
-    /**TIM3 GPIO Configuration
-    PB4     ------> TIM3_CH1
-    */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_4);
+		/* USER CODE END TIM3_MspInit 0 */
+		/* Peripheral clock enable */
+		__HAL_RCC_TIM3_CLK_ENABLE();
 
-    /* TIM3 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(TIM3_IRQn);
-  /* USER CODE BEGIN TIM3_MspDeInit 1 */
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+		/**TIM3 GPIO Configuration
+		 PB4     ------> TIM3_CH1
+		 */
+		GPIO_InitStruct.Pin = GPIO_PIN_4;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* USER CODE END TIM3_MspDeInit 1 */
-  }
-  else if(htim_base->Instance==TIM4)
-  {
-  /* USER CODE BEGIN TIM4_MspDeInit 0 */
+		__HAL_AFIO_REMAP_TIM3_PARTIAL();
 
-  /* USER CODE END TIM4_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM4_CLK_DISABLE();
-  /* USER CODE BEGIN TIM4_MspDeInit 1 */
+		/* TIM3 interrupt Init */
+		HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM3_IRQn);
+		/* USER CODE BEGIN TIM3_MspInit 1 */
 
-  /* USER CODE END TIM4_MspDeInit 1 */
-  }
+		/* USER CODE END TIM3_MspInit 1 */
+	} else if (htim_base->Instance == TIM4) {
+		/* USER CODE BEGIN TIM4_MspInit 0 */
+
+		/* USER CODE END TIM4_MspInit 0 */
+		/* Peripheral clock enable */
+		__HAL_RCC_TIM4_CLK_ENABLE();
+		/* USER CODE BEGIN TIM4_MspInit 1 */
+
+		/* USER CODE END TIM4_MspInit 1 */
+	}
+
+}
+
+/**
+ * @brief TIM_Base MSP De-Initialization
+ * This function freeze the hardware resources used in this example
+ * @param htim_base: TIM_Base handle pointer
+ * @retval None
+ */
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *htim_base) {
+	if (htim_base->Instance == TIM2) {
+		/* USER CODE BEGIN TIM2_MspDeInit 0 */
+
+		/* USER CODE END TIM2_MspDeInit 0 */
+		/* Peripheral clock disable */
+		__HAL_RCC_TIM2_CLK_DISABLE();
+
+		/**TIM2 GPIO Configuration
+		 PB10     ------> TIM2_CH3
+		 */
+		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_10);
+
+		/* TIM2 interrupt DeInit */
+		HAL_NVIC_DisableIRQ(TIM2_IRQn);
+		/* USER CODE BEGIN TIM2_MspDeInit 1 */
+
+		/* USER CODE END TIM2_MspDeInit 1 */
+	} else if (htim_base->Instance == TIM3) {
+		/* USER CODE BEGIN TIM3_MspDeInit 0 */
+
+		/* USER CODE END TIM3_MspDeInit 0 */
+		/* Peripheral clock disable */
+		__HAL_RCC_TIM3_CLK_DISABLE();
+
+		/**TIM3 GPIO Configuration
+		 PB4     ------> TIM3_CH1
+		 */
+		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_4);
+
+		/* TIM3 interrupt DeInit */
+		HAL_NVIC_DisableIRQ(TIM3_IRQn);
+		/* USER CODE BEGIN TIM3_MspDeInit 1 */
+
+		/* USER CODE END TIM3_MspDeInit 1 */
+	} else if (htim_base->Instance == TIM4) {
+		/* USER CODE BEGIN TIM4_MspDeInit 0 */
+
+		/* USER CODE END TIM4_MspDeInit 0 */
+		/* Peripheral clock disable */
+		__HAL_RCC_TIM4_CLK_DISABLE();
+		/* USER CODE BEGIN TIM4_MspDeInit 1 */
+
+		/* USER CODE END TIM4_MspDeInit 1 */
+	}
 
 }
 
