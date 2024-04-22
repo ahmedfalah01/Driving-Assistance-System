@@ -54,7 +54,7 @@ uint32_t Value1 = 0;
 uint32_t Value2 = 0;
 uint16_t Distance1 = 0; // mm
 uint16_t Distance2 = 0; // mm
-uint16_t otherDistances[2]; //mm
+float otherDistances[2]; //mm
 uint8_t BlackDetected = 0;
 uint8_t id;
 CAN_RxHeaderTypeDef rxHeader;
@@ -82,6 +82,7 @@ static void MX_CAN_Init(void);
  * @retval int
  */
 int main(void) {
+
 	/* USER CODE BEGIN 1 */
 	//
 	/* USER CODE END 1 */
@@ -106,7 +107,7 @@ int main(void) {
 	MX_GPIO_Init();
 	MX_CAN_Init();
 	/* USER CODE BEGIN 2 */
-
+	HAL_CAN_Start(&hcan);
 	HCSR04_Init(0, &htim2);
 	HCSR04_Init(1, &htim3);
 	id = (GPIOB->IDR & 0x0300) >> 8;
@@ -114,7 +115,7 @@ int main(void) {
 	txHeader.StdId = 1;
 	txHeader.RTR = CAN_RTR_DATA;
 	txHeader.DLC = id < 2 ? 5 : 4;
-	if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO1_MSG_PENDING)
+	if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING)
 			!= HAL_OK) {
 		Error_Handler();
 	}
@@ -216,7 +217,17 @@ static void MX_CAN_Init(void) {
 		Error_Handler();
 	}
 	/* USER CODE BEGIN CAN_Init 2 */
-
+	CAN_FilterTypeDef canfilterconfig;
+	canfilterconfig.FilterBank = 0;
+	canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	canfilterconfig.FilterIdHigh = 0x0 << 5;
+	canfilterconfig.FilterIdLow = 0;
+	canfilterconfig.FilterMaskIdHigh = 0xFF8 << 5; // after testing should be 0xFFF to pass id 0 only
+	canfilterconfig.FilterMaskIdLow = 0;
+	canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+	canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
+	canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
+	HAL_CAN_ConfigFilter(&hcan, &canfilterconfig);
 	/* USER CODE END CAN_Init 2 */
 
 }
@@ -236,9 +247,9 @@ static void MX_GPIO_Init(void) {
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-//  /*Configure GPIO pin Output Level */
-//  HAL_GPIO_WritePin(GPIOB, US1_TRIG_Pin|US2_TRIG_Pin, GPIO_PIN_RESET);
-//
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, US1_TRIG_Pin | US2_TRIG_Pin, GPIO_PIN_RESET);
+
 //  /*Configure GPIO pins : US1_TRIG_Pin US2_TRIG_Pin */
 //  GPIO_InitStruct.Pin = US1_TRIG_Pin|US2_TRIG_Pin;
 //  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -276,12 +287,12 @@ void SysTick_CallBack(void) {
 	}
 }
 
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rxHeader, rxData) != HAL_OK) {
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, rxData) != HAL_OK) {
 		Error_Handler();
 	}
-	otherDistances[0] = ((uint16_t) rxData[0] << 8) + rxData[1];
-	otherDistances[1] = ((uint16_t) rxData[2] << 8) + rxData[3];
+	otherDistances[0] = (((uint16_t) rxData[0] << 8) + rxData[1]) / 10.0;
+	otherDistances[1] = (((uint16_t) rxData[2] << 8) + rxData[3]) / 10.0;
 }
 /* USER CODE END 4 */
 

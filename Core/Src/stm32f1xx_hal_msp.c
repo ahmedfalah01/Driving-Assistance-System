@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -62,6 +61,7 @@
  * Initializes the Global MSP.
  */
 void HAL_MspInit(void) {
+
 	/* USER CODE BEGIN MspInit 0 */
 
 	/* USER CODE END MspInit 0 */
@@ -104,26 +104,15 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef *hcan) {
 		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-		/* CAN1 interrupt Init */
-		HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 0, 0);
-		HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
-		/* USER CODE BEGIN CAN1_MspInit 1 */
 		GPIO_InitStruct.Pin = GPIO_PIN_12;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-		CAN_FilterTypeDef canfilterconfig;
-		canfilterconfig.FilterBank = 0;
-		canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-		canfilterconfig.FilterIdHigh = 0x0 << 5;
-		canfilterconfig.FilterIdLow = 0;
-		canfilterconfig.FilterMaskIdHigh = 0xFF8 << 5; // after testing should be 0xFFF to pass id 0 only
-		canfilterconfig.FilterMaskIdLow = 0;
-		canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-		canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-		canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-		HAL_CAN_ConfigFilter(hcan, &canfilterconfig);
+		/* CAN1 interrupt Init */
+		HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+		/* USER CODE BEGIN CAN1_MspInit 1 */
+		CLEAR_BIT(hcan->Instance->MCR, CAN_MCR_DBF);
 		/* USER CODE END CAN1_MspInit 1 */
 	}
 
@@ -150,7 +139,7 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef *hcan) {
 		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11 | GPIO_PIN_12);
 
 		/* CAN1 interrupt DeInit */
-		HAL_NVIC_DisableIRQ(CAN1_RX1_IRQn);
+		HAL_NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
 		/* USER CODE BEGIN CAN1_MspDeInit 1 */
 
 		/* USER CODE END CAN1_MspDeInit 1 */
